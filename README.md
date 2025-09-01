@@ -1,0 +1,1 @@
+This is a 90 day project designed to teach me the discipline I need to keep going on a task even when things get tough.  I don't know if this will be of benefit to anyone but it is part of my development.
