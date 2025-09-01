@@ -57,3 +57,9 @@ try:
 finally:
     # Close the browser
     driver.quit()
+    # Rename the downloaded file
+    for filename in os.listdir(download_dir):
+        if filename.startswith("export") and filename.endswith(".csv"):
+            os.rename(os.path.join(download_dir, filename), os.path.join(download_dir, "gun_violence_data.csv"))
+            print("File renamed to gun_violence_data.csv")
+            break
