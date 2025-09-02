@@ -1,81 +1,40 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-import os
-import time
 import pandas as pd
+import os
+from kaggle.api.kaggle_api_extended import KaggleApi
+import zipfile
+import chardet
 
-def create_and_download_data_file():
-    # Set up the WebDriver (e.g., Chrome)
-    options = webdriver.ChromeOptions()
-    download_dir = os.getcwd()  # Set download directory to current working directory
-    prefs = {
-        "download.default_directory": download_dir,
-        "download.prompt_for_download": False,
-        "download.directory_upgrade": True,
-        "safebrowsing.enabled": True
-    }
-    options.add_experimental_option("prefs", prefs)
+def detect_encoding(file_path):
+    with open(file_path, 'rb') as f:
+        raw_data = f.read()
+        result = chardet.detect(raw_data)
+        return result['encoding']
 
-    driver = webdriver.Chrome(options=options)
+def download_and_load_data():
+    # Authenticate with Kaggle
+    api = KaggleApi()
+    api.authenticate()
 
-    try:
-        # Navigate to the web page
-        driver.get("https://www.gunviolencearchive.org/")
+    # Define the dataset and file name
+    dataset = "atharvakoshti/aeroplane-crash-data-from-1919-to-2025"  # Replace with your dataset identifier
+    file_name = "Airplane_Crashes_and_Fatalities_Since_1908.csv"  # Replace with the specific file name in the dataset
 
-        # Navigate to the query page
-        driver.get("https://www.gunviolencearchive.org/query")
+    # Download the dataset
+    api.dataset_download_file(dataset, file_name, path="./")
 
-        # Simulate clicking the button to execute the database query
-        query_button = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.ID, "edit-actions-execute"))  # Replace with the actual button ID
-        )
-        query_button.click()
+    # Extract the file if it's a zip
+    if file_name.endswith(".zip"):
+        with zipfile.ZipFile(f"./{file_name}", "r") as zip_ref:
+            zip_ref.extractall("./")
 
-        # Wait for the query results to be returned
-        WebDriverWait(driver, 30).until(
-            EC.presence_of_element_located((By.ID, "gva-entry-results-limiter"))  # Replace with the actual result element ID
-        )
-        
-        # Simulate clicking the button to export the CSV
-        download_button = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, "//a[@class='button' and text()='Export as CSV']"))
-        )
-        download_button.click()
+    # Detect the file encoding
+    encoding = detect_encoding(file_name)
+    print(f"Detected encoding: {encoding}")
 
-        # Simulate clicking the button to download the CSV
-        download_button = WebDriverWait(driver, 300).until(
-            EC.element_to_be_clickable((By.XPATH, "//a[@class='button big' and text()='Download']"))
-        )
-        download_button.click()
-
-        # Wait for the download to complete
-        time.sleep(10)  # Adjust time as needed
-
-        print(f"CSV downloaded to: {download_dir}")
-
-    finally:
-        # Close the browser
-        driver.quit()
-        # Rename the downloaded file
-        for filename in os.listdir(download_dir):
-            if filename.startswith("export") and filename.endswith(".csv"):
-                os.rename(os.path.join(download_dir, filename), os.path.join(download_dir, "gun_violence_data.csv"))
-                print("File renamed to gun_violence_data.csv")
-                break
-
-def read_csv_to_dataframe():
-    # Read the CSV file into a pandas DataFrame
-    file_path = "gun_violence_data.csv"
-    if not os.path.exists(file_path):
-        print("CSV file does not exist.  Getting it now, this may take a few minutes.")
-        create_and_download_data_file()
-    
-    df = pd.read_csv(file_path)
-    print("CSV file successfully loaded into DataFrame.")
-    return df
+    # Load the dataset into a pandas DataFrame
+    dataframe = pd.read_csv(file_name, encoding=encoding)
+    print(dataframe.head())
+    return dataframe
 
 if __name__ == "__main__":
-    dataframe = read_csv_to_dataframe()
+    dataframe = download_and_load_data()
