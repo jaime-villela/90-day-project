@@ -5,6 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import os
 import time
+import pandas as pd
 
 def create_and_download_data_file():
     # Set up the WebDriver (e.g., Chrome)
@@ -65,9 +66,16 @@ def create_and_download_data_file():
                 print("File renamed to gun_violence_data.csv")
                 break
 
-if __name__ == "__main__":
-    # Check if the file exists, if not, call the function
-    if not os.path.exists("gun_violence_data.csv"):
+def read_csv_to_dataframe():
+    # Read the CSV file into a pandas DataFrame
+    file_path = "gun_violence_data.csv"
+    if not os.path.exists(file_path):
+        print("CSV file does not exist.  Getting it now, this may take a few minutes.")
         create_and_download_data_file()
-    else:
-        print("gun_violence_data.csv already exists.")
+    
+    df = pd.read_csv(file_path)
+    print("CSV file successfully loaded into DataFrame.")
+    return df
+
+if __name__ == "__main__":
+    dataframe = read_csv_to_dataframe()
