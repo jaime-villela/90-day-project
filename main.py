@@ -103,14 +103,25 @@ def plot_combined_accidents(aviation_data, aviation_date_col, car_crashes_data, 
 
     # Plot the data
     plt.figure(figsize=(12, 6))
-    plt.plot(combined_data['Year'], combined_data['Aviation Accidents'], label='Aviation Accidents (Thousands)', marker='o')
-    plt.plot(combined_data['Year'], combined_data['Car Crashes'], label='Car Crashes (Thousands)', marker='o')
+    bar_width = 0.4  # Width of the bars
+
+    # Create bar positions for each dataset
+    years = combined_data['Year']
+    aviation_positions = years - bar_width / 2
+    car_crashes_positions = years + bar_width / 2
+
+    # Plot bars for aviation accidents and car crashes
+    plt.bar(aviation_positions, combined_data['Aviation Accidents'], width=bar_width, label='Aviation Accidents (Thousands)', color='skyblue')
+    plt.bar(car_crashes_positions, combined_data['Car Crashes'], width=bar_width, label='Car Crashes (Thousands)', color='orange')
+
+    # Add titles and labels
     plt.title('Accidents per Year')
     plt.xlabel('Year')
     plt.ylabel('Number of Accidents (Thousands)')  # Update the y-axis label
     plt.legend()
-    plt.grid(True)
-    plt.xlim(x_min, x_max)  # Set x-axis limits to overlapping years
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.xlim(x_min - 1, x_max + 1)  # Extend x-axis limits slightly for better spacing
+    plt.xticks(years, rotation=45)  # Set x-axis ticks to the years
     plt.tight_layout()
     plt.show()
 
