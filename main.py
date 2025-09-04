@@ -24,7 +24,7 @@ def download_and_load_aviation_data():
 
     # Load the aviation data into a pandas DataFrame
     aviation_data = pd.read_excel(aviation_file_name)
-    print(aviation_data.head())
+    #print(aviation_data.head())
     return aviation_data
 
 def download_and_load_car_crashes_data():
@@ -52,7 +52,7 @@ def download_and_load_car_crashes_data():
 
     # Load the CSV file into a pandas DataFrame
     dataframe = pd.read_csv(csv_file)
-    print(dataframe.head())
+    #print(dataframe.head())
     return dataframe
 
 def plot_accidents_per_year(dataframe, date_column, title):
@@ -89,15 +89,28 @@ def plot_combined_accidents(aviation_data, aviation_date_col, car_crashes_data, 
     # Merge the two datasets on the 'Year' column
     combined_data = pd.merge(aviation_accidents_per_year, car_crashes_per_year, on='Year', how='outer').fillna(0)
 
+    # Find the overlapping years
+    overlapping_years = combined_data['Year'][
+        (combined_data['Aviation Accidents'] > 0) & (combined_data['Car Crashes'] > 0)
+    ]
+
+    # Set the x-axis range to the overlapping years
+    x_min, x_max = overlapping_years.min(), overlapping_years.max()
+
+    # Convert the number of accidents to thousands
+    combined_data['Aviation Accidents'] /= 1000  # Convert to thousands
+    combined_data['Car Crashes'] /= 1000         # Convert to thousands
+
     # Plot the data
     plt.figure(figsize=(12, 6))
-    plt.plot(combined_data['Year'], combined_data['Aviation Accidents'], label='Aviation Accidents', marker='o')
-    plt.plot(combined_data['Year'], combined_data['Car Crashes'], label='Car Crashes', marker='o')
+    plt.plot(combined_data['Year'], combined_data['Aviation Accidents'], label='Aviation Accidents (Thousands)', marker='o')
+    plt.plot(combined_data['Year'], combined_data['Car Crashes'], label='Car Crashes (Thousands)', marker='o')
     plt.title('Accidents per Year')
     plt.xlabel('Year')
-    plt.ylabel('Number of Accidents')
+    plt.ylabel('Number of Accidents (Thousands)')  # Update the y-axis label
     plt.legend()
     plt.grid(True)
+    plt.xlim(x_min, x_max)  # Set x-axis limits to overlapping years
     plt.tight_layout()
     plt.show()
 
@@ -107,12 +120,6 @@ if __name__ == "__main__":
 
     # Download and load car crashes data
     car_crashes_data = download_and_load_car_crashes_data()
-
-    # Plot aviation accidents per year
-    #plot_accidents_per_year(aviation_data, "ev_date", "Aviation Accidents per Year")
-
-    # Plot car crashes per year
-    #plot_accidents_per_year(car_crashes_data, "Start_Time", "Auto Accidents per Year")
 
     # Plot combined accidents
     plot_combined_accidents(aviation_data, "ev_date", car_crashes_data, "Start_Time")
