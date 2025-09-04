@@ -212,3 +212,6 @@ __marimo__/
 
 # Other hidden files
 .DS_Store
+
+# Zipped files
+*.zip
