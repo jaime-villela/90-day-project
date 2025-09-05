@@ -4,6 +4,18 @@ import matplotlib.pyplot as plt
 from kaggle_interface import KaggleInterface
 
 def plot_combined_accidents(aviation_data, aviation_date_col, car_crashes_data, car_crashes_date_col):
+    """
+    Plots a comparison of aviation accidents and car crashes over time.
+
+    Args:
+        aviation_data (pd.DataFrame): The DataFrame containing aviation accident data.
+        aviation_date_col (str): The name of the column in `aviation_data` containing the date of the accidents.
+        car_crashes_data (pd.DataFrame): The DataFrame containing car crash data.
+        car_crashes_date_col (str): The name of the column in `car_crashes_data` containing the date of the crashes.
+
+    Returns:
+        None: The function processes the data and prepares it for plotting but does not return a value.
+    """
     # Process aviation data
     aviation_data[aviation_date_col] = pd.to_datetime(aviation_data[aviation_date_col], errors='coerce')
     aviation_data['Year'] = aviation_data[aviation_date_col].dt.year
