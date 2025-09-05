@@ -26,20 +26,15 @@ def plot_combined_accidents(aviation_data, aviation_date_col, car_crashes_data, 
     car_crashes_data['Year'] = car_crashes_data[car_crashes_date_col].dt.year
     car_crashes_per_year = car_crashes_data.groupby('Year').size().reset_index(name='Car Crashes')
 
-    # Merge the two datasets on the 'Year' column
-    combined_data = pd.merge(aviation_accidents_per_year, car_crashes_per_year, on='Year', how='outer').fillna(0)
-
-    # Find the overlapping years
-    overlapping_years = combined_data['Year'][
-        (combined_data['Aviation Accidents'] > 0) & (combined_data['Car Crashes'] > 0)
-    ]
-
-    # Set the x-axis range to the overlapping years
-    x_min, x_max = overlapping_years.min(), overlapping_years.max()
+    # Merge the two datasets on the 'Year' column using an inner join
+    combined_data = pd.merge(aviation_accidents_per_year, car_crashes_per_year, on='Year', how='inner')
 
     # Convert the number of accidents to thousands
     combined_data['Aviation Accidents'] /= 1000  # Convert to thousands
     combined_data['Car Crashes'] /= 1000         # Convert to thousands
+
+    # Set the x-axis range to the years in the combined dataset
+    x_min, x_max = combined_data['Year'].min(), combined_data['Year'].max()
 
     # Plot the data
     plt.figure(figsize=(12, 6))
