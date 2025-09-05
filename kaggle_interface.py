@@ -28,3 +28,15 @@ class KaggleInterface:
             raise FileNotFoundError("No CSV file found in the extracted dataset.")
 
         return csv_file_name
+    
+    def download_single_file_from_dataset(self, dataset_name, file_name):
+        # Download a specific file from the dataset
+        self.api.dataset_download_file(dataset_name, file_name, path=self.download_path, unzip=False)
+        
+        # If the file is compressed, extract it
+        if file_name.endswith(".zip"):
+            with zipfile.ZipFile(f"./{file_name}", "r") as zip_ref:
+                zip_ref.extractall("./")
+            file_name = zip_ref.namelist()[0]
+
+        return file_name
