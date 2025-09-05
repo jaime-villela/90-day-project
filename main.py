@@ -1,79 +1,7 @@
+#!/usr/bin/env python3
 import pandas as pd
 import matplotlib.pyplot as plt
-from kaggle.api.kaggle_api_extended import KaggleApi
-import zipfile
-import os
-
-def download_and_load_aviation_data():
-    # Authenticate with Kaggle
-    api = KaggleApi()
-    api.authenticate()
-
-    # Define the aviation dataset and file name
-    aviation_dataset = "mirzaniazmorshed/ntsb-aviation-accidents"
-    aviation_file_name = "events.xlsx"
-
-    # Download the aviation dataset
-    api.dataset_download_file(aviation_dataset, aviation_file_name, path="./")
-
-    # If the file is compressed, extract it
-    if aviation_file_name.endswith(".zip"):
-        with zipfile.ZipFile(f"./{aviation_file_name}", "r") as zip_ref:
-            zip_ref.extractall("./")
-        aviation_file_name = zip_ref.namelist()[0]
-
-    # Load the aviation data into a pandas DataFrame
-    aviation_data = pd.read_excel(aviation_file_name)
-    #print(aviation_data.head())
-    return aviation_data
-
-def download_and_load_car_crashes_data():
-    # Authenticate with Kaggle
-    api = KaggleApi()
-    api.authenticate()
-
-    # Define the car crashes dataset
-    car_crashes_dataset = "sobhanmoosavi/us-accidents"
-
-    # Download the entire dataset as a .zip file
-    dataset_zip_path = "./us-accidents.zip"
-    api.dataset_download_files(car_crashes_dataset, path="./", unzip=False)
-
-    # Unzip the dataset
-    with zipfile.ZipFile(dataset_zip_path, "r") as zip_ref:
-        zip_ref.extractall("./")
-    
-    # Find the CSV file in the extracted files
-    extracted_files = os.listdir("./")
-    csv_file = next((file for file in extracted_files if file.endswith(".csv")), None)
-
-    if not csv_file:
-        raise FileNotFoundError("No CSV file found in the extracted dataset.")
-
-    # Load the CSV file into a pandas DataFrame
-    dataframe = pd.read_csv(csv_file)
-    #print(dataframe.head())
-    return dataframe
-
-def plot_accidents_per_year(dataframe, date_column, title):
-    # Ensure the date column is in datetime format
-    dataframe['Date'] = pd.to_datetime(dataframe[date_column], errors='coerce')
-
-    # Extract the year from the date column
-    dataframe['Year'] = dataframe['Date'].dt.year
-
-    # Group by year and count the number of accidents
-    accidents_per_year = dataframe.groupby('Year').size()
-
-    # Plot the data
-    plt.figure(figsize=(10, 6))
-    accidents_per_year.plot(kind='bar', color='skyblue')
-    plt.title(title)
-    plt.xlabel('Year')
-    plt.ylabel('Number of Accidents')
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.show()
+from kaggle_interface import KaggleInterface
 
 def plot_combined_accidents(aviation_data, aviation_date_col, car_crashes_data, car_crashes_date_col):
     # Process aviation data
@@ -126,11 +54,18 @@ def plot_combined_accidents(aviation_data, aviation_date_col, car_crashes_data, 
     plt.show()
 
 if __name__ == "__main__":
-    # Download and load aviation data
-    aviation_data = download_and_load_aviation_data()
+    kaggle_interface = KaggleInterface()
+    '''
+    Download the data.  For the aviation crash data, I download a single file befause the dataset is large
+    and I only need one file.  For the car crashes data, I download the entire dataset but it takes a while
+    because it needs to be unzipped.
+    '''
+    aviation_data_file = kaggle_interface.download_single_file_from_dataset("mirzaniazmorshed/ntsb-aviation-accidents", "events.xlsx")
+    car_crashes_data_file = kaggle_interface.download_dataset("sobhanmoosavi/us-accidents")
 
-    # Download and load car crashes data
-    car_crashes_data = download_and_load_car_crashes_data()
+    # Load each dataset into a pandas DataFrame
+    aviation_data = kaggle_interface.load_excel_to_dataframe(aviation_data_file)
+    car_crashes_data = kaggle_interface.load_csv_to_dataframe(car_crashes_data_file)
 
     # Plot combined accidents
     plot_combined_accidents(aviation_data, "ev_date", car_crashes_data, "Start_Time")

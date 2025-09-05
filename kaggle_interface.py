@@ -31,7 +31,7 @@ class KaggleInterface:
     
     def download_single_file_from_dataset(self, dataset_name, file_name):
         # Download a specific file from the dataset
-        self.api.dataset_download_file(dataset_name, file_name, path=self.download_path, unzip=False)
+        self.api.dataset_download_file(dataset_name, file_name, path=self.download_path)
         
         # If the file is compressed, extract it
         if file_name.endswith(".zip"):
