@@ -40,3 +40,9 @@ class KaggleInterface:
             file_name = zip_ref.namelist()[0]
 
         return file_name
+    
+    def load_csv_to_dataframe(self, csv_file):
+        return pd.read_csv(csv_file)
+    
+    def load_excel_to_dataframe(self, excel_file):
+        return pd.read_excel(excel_file)

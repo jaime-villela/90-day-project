@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 from kaggle_interface import KaggleInterface
+import pandas as pd
 
 class TestKaggleInterface(unittest.TestCase):
     @patch("kaggle_interface.os.listdir")
@@ -104,6 +105,36 @@ class TestKaggleInterface(unittest.TestCase):
         self.assertIsInstance(kaggle_interface, KaggleInterface)  # Check instance type
         self.assertTrue(hasattr(kaggle_interface, "api"))  # Check if 'api' attribute exists
         self.assertIsNotNone(kaggle_interface.api)  # Ensure 'api' is initialized
+
+    @patch("kaggle_interface.pd.read_csv")
+    def test_load_csv_to_dataframe(self, mock_read_csv):
+        # Arrange
+        mock_dataframe = MagicMock(spec=pd.DataFrame)
+        mock_read_csv.return_value = mock_dataframe
+        kaggle_interface = KaggleInterface()
+        csv_file = "test.csv"
+
+        # Act
+        result = kaggle_interface.load_csv_to_dataframe(csv_file)
+
+        # Assert
+        mock_read_csv.assert_called_once_with(csv_file)  # Verify read_csv is called with the correct file
+        self.assertEqual(result, mock_dataframe)  # Verify the returned DataFrame is as expected
+
+    @patch("kaggle_interface.pd.read_excel")
+    def test_load_excel_to_dataframe(self, mock_read_excel):
+        # Arrange
+        mock_dataframe = MagicMock(spec=pd.DataFrame)
+        mock_read_excel.return_value = mock_dataframe
+        kaggle_interface = KaggleInterface()
+        excel_file = "test.xlsx"
+
+        # Act
+        result = kaggle_interface.load_excel_to_dataframe(excel_file)
+
+        # Assert
+        mock_read_excel.assert_called_once_with(excel_file)  # Verify read_excel is called with the correct file
+        self.assertEqual(result, mock_dataframe)  # Verify the returned DataFrame is as expected
 
 if __name__ == "__main__":
     unittest.main()
