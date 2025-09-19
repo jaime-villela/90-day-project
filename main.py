@@ -3,6 +3,31 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from kaggle_interface import KaggleInterface
 
+def create_accidents_per_year_dataset(data, date_col, new_index_name):
+    """
+    Creates a dataset of the number of accidents per year from the given data.
+
+    Args:
+        data (pd.DataFrame): The DataFrame containing accident data.
+        date_col (str): The name of the column in `data` containing the date of the accidents.
+        new_index_name (str): The name to assign to the new index column representing the year.
+
+    Returns:
+        pd.DataFrame: A DataFrame with two columns: 'Year' and 'Accidents', where 'Year' is the year of the accidents
+                      and 'Accidents' is the number of accidents that occurred in that year.
+    """
+    # Convert the date column to datetime format
+    data[date_col] = pd.to_datetime(data[date_col], errors='coerce')
+
+    # Extract the year from the date column
+    data['Year'] = data[date_col].dt.year
+
+    # Group by year and count the number of accidents per year
+    accidents_per_year = data.groupby('Year').size().reset_index(name=new_index_name)
+
+    return accidents_per_year
+
+
 def plot_combined_accidents(aviation_data, aviation_date_col, car_crashes_data, car_crashes_date_col):
     """
     Plots a comparison of aviation accidents and car crashes over time.
@@ -17,14 +42,16 @@ def plot_combined_accidents(aviation_data, aviation_date_col, car_crashes_data, 
         None: The function processes the data and prepares it for plotting but does not return a value.
     """
     # Process aviation data
-    aviation_data[aviation_date_col] = pd.to_datetime(aviation_data[aviation_date_col], errors='coerce')
-    aviation_data['Year'] = aviation_data[aviation_date_col].dt.year
-    aviation_accidents_per_year = aviation_data.groupby('Year').size().reset_index(name='Aviation Accidents')
+    #aviation_data[aviation_date_col] = pd.to_datetime(aviation_data[aviation_date_col], errors='coerce')
+    #aviation_data['Year'] = aviation_data[aviation_date_col].dt.year
+    #aviation_accidents_per_year = aviation_data.groupby('Year').size().reset_index(name='Aviation Accidents')
+    aviation_accidents_per_year = create_accidents_per_year_dataset(aviation_data, aviation_date_col, 'Aviation Accidents')
 
     # Process car crashes data
-    car_crashes_data[car_crashes_date_col] = pd.to_datetime(car_crashes_data[car_crashes_date_col], errors='coerce')
-    car_crashes_data['Year'] = car_crashes_data[car_crashes_date_col].dt.year
-    car_crashes_per_year = car_crashes_data.groupby('Year').size().reset_index(name='Car Crashes')
+    #car_crashes_data[car_crashes_date_col] = pd.to_datetime(car_crashes_data[car_crashes_date_col], errors='coerce')
+    #car_crashes_data['Year'] = car_crashes_data[car_crashes_date_col].dt.year
+    #car_crashes_per_year = car_crashes_data.groupby('Year').size().reset_index(name='Car Crashes')
+    car_crashes_per_year = create_accidents_per_year_dataset(car_crashes_data, car_crashes_date_col, 'Car Crashes')
 
     # Merge the two datasets on the 'Year' column using an inner join
     combined_data = pd.merge(aviation_accidents_per_year, car_crashes_per_year, on='Year', how='inner')
