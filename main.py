@@ -28,7 +28,7 @@ def create_accidents_per_year_dataset(data, date_col, new_index_name):
     return accidents_per_year
 
 
-def plot_combined_accidents(aviation_data, aviation_date_col, car_crashes_data, car_crashes_date_col):
+def plot_combined_accidents(aviation_accidents_per_year, car_crashes_per_year):
     """
     Plots a comparison of aviation accidents and car crashes over time.
 
@@ -41,17 +41,6 @@ def plot_combined_accidents(aviation_data, aviation_date_col, car_crashes_data, 
     Returns:
         None: The function processes the data and prepares it for plotting but does not return a value.
     """
-    # Process aviation data
-    #aviation_data[aviation_date_col] = pd.to_datetime(aviation_data[aviation_date_col], errors='coerce')
-    #aviation_data['Year'] = aviation_data[aviation_date_col].dt.year
-    #aviation_accidents_per_year = aviation_data.groupby('Year').size().reset_index(name='Aviation Accidents')
-    aviation_accidents_per_year = create_accidents_per_year_dataset(aviation_data, aviation_date_col, 'Aviation Accidents')
-
-    # Process car crashes data
-    #car_crashes_data[car_crashes_date_col] = pd.to_datetime(car_crashes_data[car_crashes_date_col], errors='coerce')
-    #car_crashes_data['Year'] = car_crashes_data[car_crashes_date_col].dt.year
-    #car_crashes_per_year = car_crashes_data.groupby('Year').size().reset_index(name='Car Crashes')
-    car_crashes_per_year = create_accidents_per_year_dataset(car_crashes_data, car_crashes_date_col, 'Car Crashes')
 
     # Merge the two datasets on the 'Year' column using an inner join
     combined_data = pd.merge(aviation_accidents_per_year, car_crashes_per_year, on='Year', how='inner')
@@ -101,5 +90,8 @@ if __name__ == "__main__":
     aviation_data = kaggle_interface.load_excel_to_dataframe(aviation_data_file)
     car_crashes_data = kaggle_interface.load_csv_to_dataframe(car_crashes_data_file)
 
+    aviation_accidents_per_year = create_accidents_per_year_dataset(aviation_data, "ev_date", 'Aviation Accidents')
+    car_crashes_per_year = create_accidents_per_year_dataset(car_crashes_data, "Start_Time", 'Car Crashes')
+    
     # Plot combined accidents
-    plot_combined_accidents(aviation_data, "ev_date", car_crashes_data, "Start_Time")
+    plot_combined_accidents(aviation_accidents_per_year, car_crashes_per_year)
