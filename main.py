@@ -27,16 +27,13 @@ def create_accidents_per_year_dataset(data, date_col, new_index_name):
 
     return accidents_per_year
 
-
 def plot_combined_accidents(combined_data):
     """
     Plots a comparison of aviation accidents and car crashes over time.
 
     Args:
-        aviation_data (pd.DataFrame): The DataFrame containing aviation accident data.
-        aviation_date_col (str): The name of the column in `aviation_data` containing the date of the accidents.
-        car_crashes_data (pd.DataFrame): The DataFrame containing car crash data.
-        car_crashes_date_col (str): The name of the column in `car_crashes_data` containing the date of the crashes.
+        combined_data (pd.DataFrame): A DataFrame containing the combined data of aviation accidents and car crashes
+                                       with columns 'Year', 'Aviation Accidents', and 'Car Crashes'.
 
     Returns:
         None: The function processes the data and prepares it for plotting but does not return a value.
@@ -83,15 +80,16 @@ if __name__ == "__main__":
     aviation_data = kaggle_interface.load_excel_to_dataframe(aviation_data_file)
     car_crashes_data = kaggle_interface.load_csv_to_dataframe(car_crashes_data_file)
 
+    # Each original dataset has a lot of information, but we only need to plot the number of accidents per year.
     aviation_accidents_per_year = create_accidents_per_year_dataset(aviation_data, "ev_date", 'Aviation Accidents')
     car_crashes_per_year = create_accidents_per_year_dataset(car_crashes_data, "Start_Time", 'Car Crashes')
     
-    # Merge the two datasets on the 'Year' column using an inner join
-    combined_data = pd.merge(aviation_accidents_per_year, car_crashes_per_year, on='Year', how='inner')
+    # The two datasets cover different time periods, so we need to merge them on the years they have in common.
+    accidents_in_overlapping_years = pd.merge(aviation_accidents_per_year, car_crashes_per_year, on='Year', how='inner')
 
-    # Convert the number of accidents to thousands
-    combined_data['Aviation Accidents'] /= 1000  # Convert to thousands
-    combined_data['Car Crashes'] /= 1000         # Convert to thousands
+    # Convert the number of accidents to thousands.  This is just to compare both datasets on the same scale.
+    accidents_in_overlapping_years['Aviation Accidents'] /= 1000  # Convert to thousands
+    accidents_in_overlapping_years['Car Crashes'] /= 1000         # Convert to thousands
 
     # Plot combined accidents
-    plot_combined_accidents(combined_data)
+    plot_combined_accidents(accidents_in_overlapping_years)
