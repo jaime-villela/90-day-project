@@ -28,7 +28,7 @@ def create_accidents_per_year_dataset(data, date_col, new_index_name):
     return accidents_per_year
 
 
-def plot_combined_accidents(aviation_accidents_per_year, car_crashes_per_year):
+def plot_combined_accidents(combined_data):
     """
     Plots a comparison of aviation accidents and car crashes over time.
 
@@ -41,13 +41,6 @@ def plot_combined_accidents(aviation_accidents_per_year, car_crashes_per_year):
     Returns:
         None: The function processes the data and prepares it for plotting but does not return a value.
     """
-
-    # Merge the two datasets on the 'Year' column using an inner join
-    combined_data = pd.merge(aviation_accidents_per_year, car_crashes_per_year, on='Year', how='inner')
-
-    # Convert the number of accidents to thousands
-    combined_data['Aviation Accidents'] /= 1000  # Convert to thousands
-    combined_data['Car Crashes'] /= 1000         # Convert to thousands
 
     # Set the x-axis range to the years in the combined dataset
     x_min, x_max = combined_data['Year'].min(), combined_data['Year'].max()
@@ -93,5 +86,12 @@ if __name__ == "__main__":
     aviation_accidents_per_year = create_accidents_per_year_dataset(aviation_data, "ev_date", 'Aviation Accidents')
     car_crashes_per_year = create_accidents_per_year_dataset(car_crashes_data, "Start_Time", 'Car Crashes')
     
+    # Merge the two datasets on the 'Year' column using an inner join
+    combined_data = pd.merge(aviation_accidents_per_year, car_crashes_per_year, on='Year', how='inner')
+
+    # Convert the number of accidents to thousands
+    combined_data['Aviation Accidents'] /= 1000  # Convert to thousands
+    combined_data['Car Crashes'] /= 1000         # Convert to thousands
+
     # Plot combined accidents
-    plot_combined_accidents(aviation_accidents_per_year, car_crashes_per_year)
+    plot_combined_accidents(combined_data)
