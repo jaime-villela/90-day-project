@@ -66,6 +66,21 @@ def plot_combined_accidents(combined_data):
     plt.tight_layout()
     plt.show()
 
+def prepare_aviation_accidents_dataset():
+    """
+    Prepares the aviation accidents dataset by extracting the year from the event date and counting the number of accidents per year.
+
+    Args:
+        none
+
+    Returns:
+        pd.DataFrame: A DataFrame with two columns: 'Year' and 'Aviation Accidents', where 'Year' is the year of the accidents
+                      and 'Aviation Accidents' is the number of aviation accidents that occurred in that year.
+    """
+    aviation_data_file = kaggle_interface.download_single_file_from_dataset("mirzaniazmorshed/ntsb-aviation-accidents", "events.xlsx")
+    aviation_data = kaggle_interface.load_excel_to_dataframe(aviation_data_file)
+    return create_accidents_per_year_dataset(aviation_data, "ev_date", 'Aviation Accidents')    
+
 if __name__ == "__main__":
     kaggle_interface = KaggleInterface()
     '''
@@ -73,15 +88,15 @@ if __name__ == "__main__":
     and I only need one file.  For the car crashes data, I download the entire dataset but it takes a while
     because it needs to be unzipped.
     '''
-    aviation_data_file = kaggle_interface.download_single_file_from_dataset("mirzaniazmorshed/ntsb-aviation-accidents", "events.xlsx")
+    #aviation_data_file = kaggle_interface.download_single_file_from_dataset("mirzaniazmorshed/ntsb-aviation-accidents", "events.xlsx")
     car_crashes_data_file = kaggle_interface.download_dataset("sobhanmoosavi/us-accidents")
 
     # Load each dataset into a pandas DataFrame
-    aviation_data = kaggle_interface.load_excel_to_dataframe(aviation_data_file)
+    #aviation_data = kaggle_interface.load_excel_to_dataframe(aviation_data_file)
     car_crashes_data = kaggle_interface.load_csv_to_dataframe(car_crashes_data_file)
 
     # Each original dataset has a lot of information, but we only need to plot the number of accidents per year.
-    aviation_accidents_per_year = create_accidents_per_year_dataset(aviation_data, "ev_date", 'Aviation Accidents')
+    aviation_accidents_per_year = prepare_aviation_accidents_dataset()
     car_crashes_per_year = create_accidents_per_year_dataset(car_crashes_data, "Start_Time", 'Car Crashes')
     
     # The two datasets cover different time periods, so we need to merge them on the years they have in common.
